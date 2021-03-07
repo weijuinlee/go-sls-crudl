@@ -1,27 +1,22 @@
-# go-sls-crudl
+# snaplock
 
 This project riffs off of the [Dynamo DB Golang samples](https://github.com/awsdocs/aws-doc-sdk-examples/tree/master/go/example_code/dynamodb) and the [Serverless Framework Go example](https://serverless.com/blog/framework-example-golang-lambda-support/) to create an example of how to build a simple API Gateway -> Lambda -> DynamoDB set of methods.
 
 ## Code Organization
 Note that, instead of using the `create_table.go` to set up the initial table like the AWS code example does, the resource building mechanism that Serverless provides is used.  Individual code is organized as follows:
 
-* functions/post.do - POST method for creating a new item
-* functions/get.do - GET method for reading a specific item
-* functions/delete.do - DELETE method for deleting a specific item
-* functions/put.do - PUT method for updating an existing item
-* functions/list-by-year.do - GET method for listing all or a subset of items
-* img/* - Images of DynamoDB tables to make this Readme easier to follow
-* moviedao/moviedao.do - DAO wrapper around the DynamoDB calls
+* functions/post.go - POST method for creating a new item
+* functions/get.go - GET method for reading a specific item
+* functions/delete.go - DELETE method for deleting a specific item
+* functions/put.go - PUT method for updating an existing item
 * data/XXX.json - Set of sample data files for POST and PUT actions
 * Makefile - Used for dep package management and compiles of individual functions
 * serverless.yml - Defines the initial table, function defs, and API Gateway events
 
-Note that given the recency of Golang support on both AWS Lambda and the Serverless Framework, combined with my own Go noob-ness, I'm not entirely certain this is the best layout but it was functional.  My hope is that it helps spark a healthy debate over what a Go Serverless project should look like.
-
 ## Set Up
 If you are a Serverless Framework rookie, [follow the installation instructions here](https://serverless.com/blog/anatomy-of-a-serverless-app/#setup).  If you are a grizzled vet, be sure that you have v1.26 or later as that's the version that introduces Golang support.  You'll also need to [install Go](https://golang.org/doc/install) and it's dependency manager, [dep](https://github.com/golang/dep).
 
-When both of those tasks are done, cd into your `GOPATH` (more than likely ~/go/src/) and clone this project into that folder.  Then cd into the resulting `go-sls-crudl` folder and compile the source with `make`:
+When both of those tasks are done, cd into your `GOPATH` (more than likely ~/go/src/) and clone this project into that folder.  Then cd into the resulting `snaplock` folder and compile the source with `make`:
 
 ```bash
 $ make
@@ -32,7 +27,7 @@ env GOOS=linux go build -ldflags="-s -w" -o bin/delete functions/delete.go
 env GOOS=linux go build -ldflags="-s -w" -o bin/put functions/put.go
 env GOOS=linux go build -ldflags="-s -w" -o bin/list-by-year functions/list-by-year.go
 ```
-What is this makefile doing?  First, it runs the `dep ensure` command, which will scan your underlying .go files looking for dependencies to install, which it will grab off of Github as needed and place under a newly created `vendor` folder under `go-sls-crudl`.  Then, it'll compile the individual function files, placing the resulting binaries in the `bin` folder.
+What is this makefile doing?  First, it runs the `dep ensure` command, which will scan your underlying .go files looking for dependencies to install, which it will grab off of Github as needed and place under a newly created `vendor` folder under `snaplock`.  Then, it'll compile the individual function files, placing the resulting binaries in the `bin` folder.
 
 If you look at the `serverless.yml` file, it makes references to those recently compiled function binaries, one for each function in our service and each one corresponding to a different verb/path in our API we're creating.  Deploy the entire service with the 'sls' command:
 
@@ -53,24 +48,24 @@ Serverless: Checking Stack update progress...
 ...................................................................................................
 Serverless: Stack update finished...
 Service Information
-service: go-sls-crudl
+service: snaplock
 stage: dev
 region: us-east-1
-stack: go-sls-crudl-dev
+stack: snaplock-dev
 api keys:
   None
 endpoints:
   GET - https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/dev/movies/{year}
   GET - https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/dev/movies/{year}/{title}
-  POST - https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/dev/movies
+  POST - https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/staging
   DELETE - https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/dev/movies/{year}/{title}
   PUT - https://XXXXXXXXXX.execute-api.us-east-1.amazonaws.com/dev/movies
 functions:
-  list: go-sls-crudl-dev-list
-  get: go-sls-crudl-dev-get
-  post: go-sls-crudl-dev-post
-  delete: go-sls-crudl-dev-delete
-  put: go-sls-crudl-dev-put
+  list: snaplock-dev-list
+  get: snaplock-dev-get
+  post: snaplock-dev-post
+  delete: snaplock-dev-delete
+  put: snaplock-dev-put
 ```
 
 When done, you can find the new DynamoDB table in the AWS Console, which should initially look like this:

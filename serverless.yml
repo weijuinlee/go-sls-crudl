@@ -1,10 +1,10 @@
-service: go-sls-crudl
+service: snaplock
 
 provider:
   name: aws
   runtime: go1.x
   environment:
-        TABLE_NAME: movies-${opt:stage, self:provider.stage}
+        TABLE_NAME: rooms-${opt:stage, self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -24,35 +24,30 @@ package:
    - ./bin/**
 
 functions:
-  list:
-    handler: bin/list-by-year
-    events:
-      - http:
-          path: movies/{year}
-          method: get
+
   get:
     handler: bin/get
     events:
       - http:
-          path: movies/{year}/{title}
+          path: rooms/{id}
           method: get
   post:
     handler: bin/post
     events:
       - http:
-          path: movies
+          path: rooms
           method: post
   delete:
     handler: bin/delete
     events:
       - http:
-          path: movies/{year}/{title}
+          path: rooms/{id}
           method: delete
   put:
     handler: bin/put
     events:
       - http:
-          path: movies
+          path: rooms
           method: put
 
 resources:
@@ -62,16 +57,16 @@ resources:
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          - AttributeName: year
+          - AttributeName: id
             AttributeType: N
-          - AttributeName: title
+          - AttributeName: url
             AttributeType: S
         KeySchema:
-          - AttributeName: year
+          - AttributeName: id
             KeyType: HASH
-          - AttributeName: title
+          - AttributeName: url
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: 'movies-${opt:stage, self:provider.stage}'
+        TableName: 'rooms-${opt:stage, self:provider.stage}'
